@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - web_server
+    networks:
+      - app_network
+
+  web_server:
+    build:
+      context: .
+      dockerfile: web-server/Dockerfile
+    environment:
+      - SERVER_NAME=${SERVER_NAME}
+    depends_on:
+      - sequence_generator
+    networks:
+      - app_network
+    container_name: web_server
+
+  sequence_generator:
+    build:
+      context: .
+      dockerfile: sequence-generator/Dockerfile
+    environment:
+      - SEQUENCE_LENGTH=${SEQUENCE_LENGTH}
+    networks:
+      - app_network
+    container_name: sequence_generator
+
+networks:
+  app_network:
+    driver: bridge
